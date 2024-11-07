@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using WebApplication1.Models;
 using WebApplication1.RequestModel;
 using WebApplication1.ResponseModel;
@@ -12,10 +14,12 @@ namespace WebApplication1.Controllers
     public class TaiKhoanController : ControllerBase
     {
         private readonly QLBHDbContext _context;
+        private readonly JwtHelper _jwtHelper;
 
-        public TaiKhoanController(QLBHDbContext context)
+        public TaiKhoanController(QLBHDbContext context, JwtHelper jwtHelper)
         {
             _context = context;
+            _jwtHelper = jwtHelper;
         }
 
         /// <summary>
@@ -23,6 +27,7 @@ namespace WebApplication1.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [Authorize]
         public IEnumerable<TaiKhoanResponseModel> Get()
         {
 
@@ -61,6 +66,18 @@ namespace WebApplication1.Controllers
                                 }
                         };
             return query.ToList();
+        }
+
+        [HttpPost("login")]
+        public ActionResult<string> Login([FromBody] LoginRequestModel loginRequest)
+        {
+            var taiKhoan = _context.TaiKhoans.FirstOrDefault(taiKhoan => taiKhoan.Email == loginRequest.Email && taiKhoan.UserPassword == loginRequest.Password);
+            if (taiKhoan == null)
+            {
+                return NotFound();
+            }
+
+            return _jwtHelper.GenerateToken(taiKhoan.Email, "user");
         }
 
         /// <summary>
