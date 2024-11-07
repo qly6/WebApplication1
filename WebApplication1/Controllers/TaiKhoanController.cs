@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 using WebApplication1.RequestModel;
+using WebApplication1.ResponseModel;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApplication1.Controllers
 {
@@ -21,9 +23,44 @@ namespace WebApplication1.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public IEnumerable<TaiKhoan> Get()
+        public IEnumerable<TaiKhoanResponseModel> Get()
         {
-            return _context.TaiKhoans.ToList();
+
+        // Cach1 : Linq Extension
+        //return _context.TaiKhoans
+        //    .Include(taikhoan => taikhoan.HangHoas)
+        //    .Select(taikhoan => new TaiKhoanResponseModel()
+        //    {
+        //        Address = taikhoan.Address,
+        //        Email = taikhoan.Email,
+        //        Firstname = taikhoan.Firstname,
+        //        Lastname = taikhoan.Lastname,
+        //        UserId = taikhoan.UserId,
+        //        HangHoas = taikhoan.HangHoas.Select(hanghoa => new HangHoaDto()
+        //        {
+        //            Code = hanghoa.Code,
+        //            Name = hanghoa.Name,
+        //            Price = hanghoa.Price,
+        //        })
+        //    }).ToList();
+
+            //Cach2: Linq Query
+         var query = from taikhoan in _context.TaiKhoans
+                       select new TaiKhoanResponseModel
+                       {
+                           UserId = taikhoan.UserId,
+                           Email = taikhoan.Email,
+                           Firstname = taikhoan.Firstname,
+                           Lastname = taikhoan.Lastname,
+                           HangHoas = from h in taikhoan.HangHoas
+                               select new HangHoaDto
+                                {
+                                    Code = h.Code,
+                                    Name = h.Name,
+                                    Price = h.Price
+                                }
+                        };
+            return query.ToList();
         }
 
         /// <summary>
