@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 using WebApplication1.RequestModel;
+using WebApplication1.ResponseModel;
 
 namespace WebApplication1.Controllers
 {
@@ -21,9 +22,24 @@ namespace WebApplication1.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public IEnumerable<TaiKhoan> Get()
+        public IEnumerable<TaiKhoanResponseModel> Get()
         {
-            return _context.TaiKhoans.ToList();
+            return _context.TaiKhoans
+                .Include(taikhoan => taikhoan.HangHoas)
+                .Select(taikhoan => new TaiKhoanResponseModel()
+                {
+                    Address = taikhoan.Address,
+                    Email = taikhoan.Email,
+                    Firstname = taikhoan.Firstname,
+                    Lastname = taikhoan.Lastname,
+                    UserId = taikhoan.UserId,
+                    HangHoas = taikhoan.HangHoas.Select(hanghoa => new HangHoaDto()
+                    {
+                        Code = hanghoa.Code,
+                        Name = hanghoa.Name,
+                        Price = hanghoa.Price,
+                    })
+                }).ToList();
         }
 
         /// <summary>

@@ -21,6 +21,7 @@ public partial class HangHoa
     public int? TaiKhoanUpdateId { get; set; }
 
     public DateTime? NgayCapNhap { get; set; }
-    //[JsonIgnore]
+
+    [JsonIgnore]
     public virtual TaiKhoan? TaiKhoan { get; set; }
 }

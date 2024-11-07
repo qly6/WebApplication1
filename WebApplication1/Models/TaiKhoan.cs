@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WebApplication1.Models;
 
@@ -19,5 +20,6 @@ public partial class TaiKhoan
 
     public string? Address { get; set; }
 
+    
     public virtual ICollection<HangHoa> HangHoas { get; set; } = new List<HangHoa>();
 }
