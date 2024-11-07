@@ -42,7 +42,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddDbContext<QLBHDbContext>(options =>
-options.UseSqlServer("Data Source=.;Initial Catalog=QL_BANHANG;User ID=user_QLBH;Trust Server Certificate=True;Password=1234"));
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -57,16 +59,16 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = "your_issuer", // replace with your issuer
-        ValidAudience = "your_audience", // replace with your audience
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_secret_key_your_secret_key_your_secret_key_your_secret_keyyour_secret_key_your_secret_key_your_secret_key_your_secret_key")) // replace with your secret key
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
     };
 });
 
 builder.Services.AddSingleton<JwtHelper>(new JwtHelper(
-    secretKey: "your_secret_key_your_secret_key_your_secret_key_your_secret_keyyour_secret_key_your_secret_key_your_secret_key_your_secret_key",
-    issuer: "your_issuer",
-    audience: "your_audience"
+    secretKey: jwtSettings.SecretKey,
+    issuer: jwtSettings.Issuer,
+    audience: jwtSettings.Audience
 ));
 
 
