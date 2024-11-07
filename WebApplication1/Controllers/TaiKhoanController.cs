@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 using WebApplication1.RequestModel;
+using WebApplication1.ResponseModel;
 
 namespace WebApplication1.Controllers
 {
@@ -21,9 +22,34 @@ namespace WebApplication1.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public IEnumerable<TaiKhoan> Get()
+        public async Task<ActionResult<IEnumerable<UsersDto>>> Get()
         {
-            return _context.TaiKhoans.ToList();
+
+            //var query = _context.TaiKhoans.Include(tk => tk.HangHoas).Select(tk => new UsersDto()
+            //{
+            //    UserId = tk.UserId,
+            //    HangHoas = tk.HangHoas.Select(h => new HangHoaDto()
+            //    {
+            //        Code = h.Code,
+            //        Name = h.Name,
+            //        Price = h.Price,
+            //    })
+            //});
+
+            var query = from tk in _context.TaiKhoans
+                        select new UsersDto
+                        {
+                            UserId = tk.UserId,
+                            HangHoas = from h in tk.HangHoas
+                                       select new HangHoaDto
+                                       {
+                                           Code = h.Code,
+                                           Name = h.Name,
+                                           Price = h.Price
+                                       }
+                        };
+
+            return Ok(await query.ToListAsync());
         }
 
         /// <summary>
